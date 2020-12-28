@@ -24,11 +24,7 @@ You need Python3 installed in your machine, along with PyPI ( pip3 ).
 
       `sudo apt-get install python3 python3-pip git`
 	  
-      `git clone https://github.com/bortox/latin_paradigm_finder`
-	  
-     ` cd latin_paradigm_finder`
-	 
-     ` sudo python3 setup.py install && cd ../ && rm -rf latin_paradigm_finder`
+      `git clone https://github.com/bortox/latin_paradigm_finder && cd latin_paradigm_finder && sudo python3 setup.py install && cd ../ && sudo rm -rf latin_paradigm_finder`
    
 ### Open the program
 **Type**  `paradigmi` in your terminal to open the program
