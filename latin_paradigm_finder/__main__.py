@@ -28,20 +28,15 @@ from unidecode import unidecode as undcd
 
 
 urllist = []
-temp_html_path = Path("../temp-html/")
+temp_html_path = Path.home().joinpath('.temp-html')
 temp_html_path.mkdir(parents=True, exist_ok=True)
 npar = 0
 done = 0
-db_path = Path("../../database")
+db_path = Path.home().joinpath('.db-latino')
 db_path.mkdir(parents=True, exist_ok=True)
 baseurl = 'https://www.dizionario-latino.com/'
 baseurl = 'https://www.dizionario-latino.com/'
 ################# CARICA PAGINE HTML ###############
-
-
-Path(f"../temp-html").mkdir(parents=True, exist_ok=True)
-temp_html_path = Path("../temp-html/")
-db_path = Path("../../database")
 
 # Liste permanenti poi salvate come file .hkl, in questo caso temporanee per la sessione
 
