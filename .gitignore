@@ -1,0 +1,6 @@
+# Lines starting with `#` are comments.
+build/
+dist/
+venv/
+.idea/
+__pycache__/
