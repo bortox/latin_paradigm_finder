@@ -11,14 +11,15 @@ It makes a database where all  the words information is stored, so it doesn't we
 
 
 #### Short video of how it works
-<a href="https://asciinema.org/a/TvE5kF5kfrgZd1xhnmeiEn7fh"><img src="https://asciinema.org/a/381440.png"></img></a>
+<a href="https://asciinema.org/a/381561"><img src="https://asciinema.org/a/381561.png"></img></a>
 
 ### Installation
 
-You need Python3 installed in your machine, along with PyPI ( pip3 ).
+> The code is cross platform, I will soon upload how to install on Windows and MacOS
 
 **Steps for Ubuntu 20.04**
-
+#### Short video of the installation
+<a href="https://asciinema.org/a/381560"><img src="https://asciinema.org/a/381560.png"></img></a>
 1. Open a terminal with CTRL + ALT + T
 2. Copy and paste these commands for installation
 
