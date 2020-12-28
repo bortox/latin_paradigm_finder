@@ -28,21 +28,14 @@ from unidecode import unidecode as undcd
 
 
 urllist = []
-temp_html_path = Path("../temp-html/")
+temp_html_path = Path.home().joinpath('.temp-html')
+print(temp_html_path)
 temp_html_path.mkdir(parents=True, exist_ok=True)
 npar = 0
 done = 0
-db_path = Path("../../database")
+db_path = Path.home().joinpath('.db-latino')
 db_path.mkdir(parents=True, exist_ok=True)
 baseurl = 'https://www.dizionario-latino.com/'
-baseurl = 'https://www.dizionario-latino.com/'
-################# CARICA PAGINE HTML ###############
-
-
-Path(f"../temp-html").mkdir(parents=True, exist_ok=True)
-temp_html_path = Path("../temp-html/")
-db_path = Path("../../database")
-
 # Liste permanenti poi salvate come file .hkl, in questo caso temporanee per la sessione
 
 url_list = []  # Lista di tutti gli indirizzi web controllati
@@ -368,7 +361,7 @@ def find():
     dbsave(url_list, 'url_list')
     dbsave(tipo_list, 'tipo_list')
     dbsave(paradigma_list, 'paradigma_list')
-    rmtree('../temp-html')
+    rmtree(temp_html_path)
     print(f'Ho creato una lista di ben {len(paradigmi)} paradigmi!')
     paradigmifull = '\n\n'.join(paradigmi)
     c = questionary.confirm("Vuoi copiare negli appunti la lista dei paradigmi?").ask()
