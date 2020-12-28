@@ -363,7 +363,7 @@ def find():
     dbsave(url_list, 'url_list')
     dbsave(tipo_list, 'tipo_list')
     dbsave(paradigma_list, 'paradigma_list')
-    rmtree('../temp-html')
+    rmtree(temp_html_path)
     print(f'Ho creato una lista di ben {len(paradigmi)} paradigmi!')
     paradigmifull = '\n\n'.join(paradigmi)
     c = questionary.confirm("Vuoi copiare negli appunti la lista dei paradigmi?").ask()
