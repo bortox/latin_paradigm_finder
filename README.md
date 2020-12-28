@@ -21,6 +21,7 @@ You need Python3 installed in your machine, along with PyPI ( pip3 ).
 
 1. Open a terminal with CTRL + ALT + T
 2. Copy and paste these commands for installation
+
       `sudo apt-get install python3 python3-pip git`
 	  
       `git clone https://github.com/bortox/latin_paradigm_finder`
