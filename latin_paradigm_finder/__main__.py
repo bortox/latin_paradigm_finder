@@ -17,10 +17,11 @@ import clipboard
 import hickle as hkl
 import questionary
 from bs4 import BeautifulSoup as bs
-from easygui import filesavebox
 from termcolor import colored, cprint
 from unidecode import unidecode as undcd
-
+from os.path import isdir,join
+from os import listdir
+from pathvalidate import sanitize_filename
 
 # ----------------------------------------------------------------------------------------------
 # Variables
@@ -28,13 +29,13 @@ from unidecode import unidecode as undcd
 
 
 urllist = []
-temp_html_path = Path.home().joinpath('.temp-html')
+home_path = Path.home()
+temp_html_path = home_path.joinpath('.temp-html')
 temp_html_path.mkdir(parents=True, exist_ok=True)
 npar = 0
 done = 0
-db_path = Path.home().joinpath('.db-latino')
+db_path = home_path.joinpath('.db-latino')
 db_path.mkdir(parents=True, exist_ok=True)
-baseurl = 'https://www.dizionario-latino.com/'
 baseurl = 'https://www.dizionario-latino.com/'
 ################# CARICA PAGINE HTML ###############
 
@@ -59,6 +60,33 @@ parole = []  # Parole. Deve essere collegata agli indici di url_list e quelle al
 # Functions
 # ----------------------------------------------------------------------------------------------
 
+def list_dir(path,filterhidden=False): # List all files in a folder, if filterhidden=True don't list already saved files
+
+    if filterhidden:
+        folders = list(filter(lambda x: isdir(join(path, x)), listdir(path)))
+        return [x for x in folders if x[0] != '.']
+    else:
+        return list(filter(lambda x: isdir(join(path, x)), listdir(path)))
+
+def select_path(tmp_path): # Select a path to save a file
+    save_path = ''
+    while save_path != 'Salva qui il file':
+        prev_path = tmp_path
+        folders_list = list_dir(tmp_path,filterhidden=True)
+        final_list = ['Salva qui il file'] + folders_list
+        save_path = questionary.select(message=f'Scegli dove salvare il file contenente i paradigmi. Percorso corrente: {tmp_path}',choices=final_list,instruction='Usa i tasti freccia sopra e freccia sotto per selezionare una risposta. Quando il percorso è OK seleziona \' Salva qui il file \'.').ask()
+        tmp_path = prev_path.joinpath(save_path)
+    print('Percorso dove salverò il file: ' + colored(prev_path,'red'))
+    default_name = questionary.confirm("Salvare con nome 'paradigmi.txt'?").ask()
+    if default_name:
+        return prev_path.joinpath('paradigmi.txt')
+    else:
+        path = questionary.text("Inserisci il nome del file",default='paradigmi.txt').ask()
+        sanitized_path = sanitize_filename(path)
+        print(path,sanitized_path)
+        if path != sanitized_path:
+            print('Il nome ' + colored(path,'red') + ' non è valido ed è stato automaticamente corretto con ' + colored(sanitized_path,'green'))
+        return prev_path.joinpath(sanitized_path)
 
 def filter_versione(text):  # Filter a text, leave only words; replace accents and remove text in brackets.
     text = " ".join(text.split())
@@ -92,7 +120,7 @@ def del_from_lists(indexes, *liste):  # This function deletes from one or more l
             delete_offset += 1
 
 
-def dbload(nome):  # This function returns the value of a loaded list from the database, saved in .hkl format
+def db_load(nome):  # This function returns the value of a loaded list from the database, saved in .hkl format
     path = db_path / nome
     myfile = Path(path).absolute()
     if myfile.is_file():
@@ -102,8 +130,8 @@ def dbload(nome):  # This function returns the value of a loaded list from the d
         return []
 
 
-def dbsave(lista, nome,
-           preserve=True):  # This function saves on the database a list, with the option to preserve or not the previous content ( append or overwrite )
+def db_save(lista, nome,
+            preserve=True):  # This function saves on the database a list, with the option to preserve or not the previous content ( append or overwrite )
     cprint('Salvando sul database', 'yellow', end=' ')
     cprint(nome, 'red')
     path = db_path / nome
@@ -132,19 +160,18 @@ def dbsave(lista, nome,
             'Non salverò un file vuoto. Se hai appena trovato i paradigmi di una versione e trovato questo errore, contattami a borto@tuta.io ',
             'red')
 
-
 def standard_delete_duplicates():  # This is a bad function. It deletes duplicates from db, but names are hardcoded.
     # I know, I shouldn't hardcode names like this. If you have suggestions open a pull request
-    listaurl = dbload('url_list')
+    listaurl = db_load('url_list')
     doppi = return_index_of_duplicates(listaurl)
-    tipi = dbload('tipo_list')
-    paradigmi = dbload('paradigma_list')
+    tipi = db_load('tipo_list')
+    paradigmi = db_load('paradigma_list')
     print(f'Trovate {len(doppi)} entrate doppie nel database su {len(listaurl)} entrate totali.')
     if len(doppi) > 0:
         del_from_lists(doppi, tipi, paradigmi, listaurl)
-        dbsave(listaurl, 'url_list', preserve=False)
-        dbsave(tipi, 'tipo_list', preserve=False)
-        dbsave(paradigmi, 'paradigma_list', preserve=False)
+        db_save(listaurl, 'url_list', preserve=False)
+        db_save(tipi, 'tipo_list', preserve=False)
+        db_save(paradigmi, 'paradigma_list', preserve=False)
 
 
 def progress(count, total, status=''):  # Print progress of doing a task
@@ -300,9 +327,9 @@ def trova(url, parola=None):  # Analyze the HTML file of a Dizionario Latino Oli
 
 try:
     # Liste permanenti caricate per tutta la sessione che vengono aggiornate.
-    urllista = dbload('url_list')
-    tipolista = dbload('tipo_list')
-    paradigmalista = dbload('paradigma_list')
+    urllista = db_load('url_list')
+    tipolista = db_load('tipo_list')
+    paradigmalista = db_load('paradigma_list')
 except Exception as e:
     print(e)
 
@@ -333,7 +360,7 @@ def find():
         for i in parole: urllist.append(f"https://www.dizionario-latino.com/dizionario-latino-italiano.php?parola={i}")
     print('La lista è stata compilata.')
     try:
-        urllista = dbload('url_list')
+        urllista = db_load('url_list')
         listafinale = (set(urllist)) - set(urllista)
         percent = round(len(listafinale) * 100 / len(urllist), 1)
         if percent != 0:
@@ -349,9 +376,9 @@ def find():
     for url in urllist:
         trova(url, parola=parole[c])
         c += 1
-    dbsave(url_list, 'url_list')
-    dbsave(tipo_list, 'tipo_list')
-    dbsave(paradigma_list, 'paradigma_list')
+    db_save(url_list, 'url_list')
+    db_save(tipo_list, 'tipo_list')
+    db_save(paradigma_list, 'paradigma_list')
     cprint('Ho finito di analizzare tutti i paradigmi', 'green')
     if len(to_download) > 0:
         cprint('Scarico le pagine web dei verbi scelti durante la disambiguazione....')
@@ -360,9 +387,9 @@ def find():
         parole = None
         for url in to_download:
             trova(url)
-    dbsave(url_list, 'url_list')
-    dbsave(tipo_list, 'tipo_list')
-    dbsave(paradigma_list, 'paradigma_list')
+    db_save(url_list, 'url_list')
+    db_save(tipo_list, 'tipo_list')
+    db_save(paradigma_list, 'paradigma_list')
     rmtree(temp_html_path)
     print(f'Ho creato una lista di ben {len(paradigmi)} paradigmi!')
     paradigmifull = '\n\n'.join(paradigmi)
@@ -373,12 +400,12 @@ def find():
     c = questionary.confirm("Vuoi salvare in un file la lista dei paradigmi?").ask()
     if c:
         try:
-            file = filesavebox(msg="Scegli dove e come salvare il file contenente i paradigmi")
+            file = select_path(home_path)
             f = open(file, 'w')
             f.write(paradigmifull)
             f.close()
             cprint(f'Il file {file} è stato salvato!', 'green')
         except Exception as e:
-            print('È avvenuto un errore (', colored(e, "red"), ') ed il file contenente i paradigmi non è stato salvato.')
+            print('È avvenuto un errore inaspettato (', colored(e, "red"), ') ed il file contenente i paradigmi non è stato salvato.')
     sys.exit(0)
 find()
