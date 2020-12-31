@@ -1,8 +1,9 @@
----
 ##### Italiano
 
 ## Paradigmi !
+
 > Hai un noioso compito di scrivere tutti i paradigmi presenti in una versione? Questo è lo script che fa per te! Trova tutti i paradigmi di una versione, togli loro gli accenti e salvali in una pratica lista in un batter d' occhio!
+
 <img src="https://raw.githubusercontent.com/bortox/latin_paradigm_finder/master/img/command-prompt.png" align="Center">
 
 ### Installazione
