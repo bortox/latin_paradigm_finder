@@ -14,7 +14,7 @@ from re import sub
 from shutil import rmtree
 from time import sleep
 import clipboard
-import hickle as hkl
+import pickle as pkl
 import questionary
 from bs4 import BeautifulSoup as bs
 from termcolor import colored, cprint
@@ -89,7 +89,7 @@ def select_path(tmp_path): # Select a path to save a file
         return prev_path.joinpath(sanitized_path)
 
 def filter_versione(text):  # Filter a text, leave only words; replace accents and remove text in brackets.
-    text = " ".join(text.split())
+    text = " ".join(text.split()).lower()
     text = text.replace('\n', '').replace('.', ' ').replace(',', ' ').replace('«', '').replace('»', '')
     text = sub("[\(\[].*?[\)\]]", "", text)
     text = "".join(c for c in text if c.isalpha() or c == " ").split()
@@ -124,14 +124,14 @@ def db_load(nome):  # This function returns the value of a loaded list from the 
     path = db_path / nome
     myfile = Path(path).absolute()
     if myfile.is_file():
-        return hkl.load(myfile)
+        with open(myfile, 'rb') as f:
+            return pkl.load(f)
     elif not myfile.is_file():
         cprint('Il database non è presente sul disco', 'red')
         return []
 
 
-def db_save(lista, nome,
-            preserve=True):  # This function saves on the database a list, with the option to preserve or not the previous content ( append or overwrite )
+def db_save(lista, nome,preserve=True):  # This function saves on the database a list, with the option to preserve or not the previous content ( append or overwrite )
     cprint('Salvando sul database', 'yellow', end=' ')
     cprint(nome, 'red')
     path = db_path / nome
@@ -139,19 +139,21 @@ def db_save(lista, nome,
     if len(lista) > 0:
         if myfile.is_file() == True and preserve == True:
             try:
-                listacaricata = hkl.load(myfile)
+                with open(myfile, 'rb') as f:
+                    listacaricata = pkl.load(f)
                 lf = (lista + listacaricata)
-                hkl.dump(lf, myfile)  # L' eliminazione dei duplicati avverrà su un' altra funzione
+                with open(myfile, 'wb') as f:
+                    pkl.dump(lf, f)  # L' eliminazione dei duplicati avverrà su un' altra funzione
                 cprint('salvato sul database senza alcun problema.', 'green')
             except Exception as e:
                 print('È avvenuto un errore (', colored(e, "red"),
-                      ') inaspettato nell\' aggiornamento del database.\n' + colored(
-                          '\n\nCiò non è fonte di alcun problema per l\' utente finale, quindi prosegui pure nella ricerca di paradigmi.\n\n',
-                          'red', 'on_white') + ' \n Se vuoi andare più a fondo puoi aprire una issue su GitHub.')
-                hkl.dump(lista, myfile)
+                      ') inaspettato nell\' aggiornamento del database.\n' + colored('\n\nCiò non è fonte di alcun problema per l\' utente finale, quindi prosegui pure nella ricerca di paradigmi.\n\n','blue') + ' \n Se vuoi andare più a fondo puoi aprire una issue su GitHub.')
+                with open(myfile, 'wb') as f:
+                    pkl.dump(lista, f)  # L' eliminazione dei duplicati avverrà su un' altra funzione
         elif myfile.is_file() == False or preserve == False:
             Path(myfile).touch()
-            hkl.dump(lista, myfile)
+            with open(myfile,'wb') as f:
+                pkl.dump(lista, f)
             cprint('File', 'green', end=' ')
             cprint(nome, 'red', end=' ')
             cprint('salvato sul database senza alcun problema.', 'green')
@@ -261,7 +263,7 @@ def trova(url, parola=None):  # Analyze the HTML file of a Dizionario Latino Oli
         soup = bs(html, 'lxml')
         grammatica = soup.find_all('span', {'class': 'grammatica'})  # [0].get_text()
         if "Si prega di controllare l'ortografia" in str(soup):
-            cprint('Errore: Pagina non esistente', 'red', 'on_white')
+            cprint('Errore: Pagina non esistente', 'blue')
             url_list.append(0)
             paradigma_list.append(0)
             tipo_list.append(0)
@@ -300,8 +302,8 @@ def trova(url, parola=None):  # Analyze the HTML file of a Dizionario Latino Oli
                         try:
                             cprint('CONTESTO PER ORIENTARSI, PAROLE FINO A', end=' ')
                             cprint(parole[-1].upper(), 'red')
-                            cprint(" ".join(parole[-6:-1]), 'blue', 'on_white', end='  ')
-                            cprint('  ' + parole[-1] + '  ', 'red', 'on_white', end='\n\n')
+                            cprint(" ".join(parole[-6:-1]), 'blue', end='  ')
+                            cprint('  ' + parole[-1] + '  ', 'blue', end='\n\n')
                         except Exception as e:
                             print('ERRORE IMPREVISTO:' + colored(e, 'red') + '\n' + colored(
                                 'Ricorda che quest\' errore non crea nessun problema all\' utente finale! Puoi continuare a tradurre! Don\'t worry!',
@@ -349,7 +351,7 @@ def find():
         'yellow')
     cprint(
         'TL;DR Con le forme flesse avrai più precisione nel rilevamento di falsi paradigmi, ma ciò necessiterà di maggior tempo e attenzione da parte tua.',
-        'red', 'on_white')
+        'blue')
     mdff = questionary.confirm("Vuoi analizzare le forme flesse di queste parole?").ask()
     cprint('Compilando la lista degli indirizzi web da controllare...', 'yellow')
     urllist = []
