@@ -408,7 +408,7 @@ def find():
         try:
             file = select_path(home_path)
             f = open(file, 'wb')
-            f.write(paradigmifull)
+            f.write(paradigmifull.encode())
             f.close()
             cprint(f'Il file {file} è stato salvato!', 'green')
         except Exception as e:
