@@ -18,7 +18,7 @@ URL = 'https://github.com/bortox/latin-paradigm-finder'
 EMAIL = 'borto@tuta.io'
 AUTHOR = 'Andrea Bortolotti / bortox'
 REQUIRES_PYTHON = '>=3.6.0'
-VERSION = '0.1.2'
+VERSION = '0.1.4'
 
 # What packages are required for this module to be executed?
 here = os.path.abspath(os.path.dirname(__file__))

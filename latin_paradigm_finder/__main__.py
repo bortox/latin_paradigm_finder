@@ -22,6 +22,7 @@ from unidecode import unidecode as undcd
 from os.path import isdir,join
 from os import listdir
 from pathvalidate import sanitize_filename
+import colorama
 
 # ----------------------------------------------------------------------------------------------
 # Variables
@@ -37,6 +38,7 @@ done = 0
 db_path = home_path.joinpath('.db-latino')
 db_path.mkdir(parents=True, exist_ok=True)
 baseurl = 'https://www.dizionario-latino.com/'
+
 ################# CARICA PAGINE HTML ###############
 
 # Liste permanenti poi salvate come file .hkl, in questo caso temporanee per la sessione
@@ -60,6 +62,8 @@ parole = []  # Parole. Deve essere collegata agli indici di url_list e quelle al
 # Functions
 # ----------------------------------------------------------------------------------------------
 
+
+colorama.init() # Enable colored text in Windows OS.
 def list_dir(path,filterhidden=False): # List all files in a folder, if filterhidden=True don't list already saved files
 
     if filterhidden:
@@ -258,7 +262,7 @@ def trova(url, parola=None):  # Analyze the HTML file of a Dizionario Latino Oli
                 print('.')
     except:
         file_name = temp_html_path / b64encode(url.encode()).decode()
-        with open(file_name, 'r') as file:
+        with open(file_name, 'rb') as file:
             html = file.read()
         soup = bs(html, 'lxml')
         grammatica = soup.find_all('span', {'class': 'grammatica'})  # [0].get_text()
@@ -403,7 +407,7 @@ def find():
     if c:
         try:
             file = select_path(home_path)
-            f = open(file, 'w')
+            f = open(file, 'wb')
             f.write(paradigmifull)
             f.close()
             cprint(f'Il file {file} è stato salvato!', 'green')
