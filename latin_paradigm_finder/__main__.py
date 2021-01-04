@@ -200,7 +200,7 @@ async def task(name, work_queue):
             if x.is_file() == False:
                 async with session.get(url) as response:
                     html = await response.text()
-                    with open(temp_html_path / b64encode(url.encode()).decode(), "w") as file:
+                    with open(temp_html_path / b64encode(url.encode()).decode(), "wb") as file:
                         file.write(html)
                     sleep(0.16)  # Sennò potrebbe parere un attacco DDoS
             done += 1
